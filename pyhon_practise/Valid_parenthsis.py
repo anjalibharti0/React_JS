@@ -19,3 +19,4 @@ def isValid(s):
                 return False
 
     return len(stack) == 0
+    # {[]}//valid

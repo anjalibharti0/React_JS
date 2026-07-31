@@ -27,3 +27,4 @@ def isBalanced(s):
         return "YES"
 
     return "NO"
+print(isBalanced("[({})]"))    

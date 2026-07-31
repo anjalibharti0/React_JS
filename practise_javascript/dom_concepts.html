@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DOM Concepts - More Examples</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .box { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        .highlight { background-color: yellow; }
+    </style>
+</head>
+<body>
+    <h1>DOM Concepts - Detailed Examples</h1>
+
+    <h2>1. Select Elements</h2>
+    <div class="box" id="select-box">
+        <p class="text">First paragraph</p>
+        <p class="text">Second paragraph</p>
+        <p class="text">Third paragraph</p>
+    </div>
+    <button onclick="selectDemo()">Run Select Demo</button>
+    <div id="select-output"></div>
+
+    <h2>2. Create & Append</h2>
+    <div class="box" id="create-box"></div>
+    <button onclick="createDemo()">Create 5 Items</button>
+
+    <h2>3. Modify Elements</h2>
+    <p id="modify-text">Original text</p>
+    <button onclick="modifyDemo()">Modify This</button>
+
+    <h2>4. Remove Elements</h2>
+    <ul id="remove-list">
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+    </ul>
+    <button onclick="removeDemo()">Remove Last Item</button>
+
+    <h2>5. Event Handling</h2>
+    <div class="box" id="event-box" style="background: lightblue; cursor: pointer;">
+        Click me or hover over me!
+    </div>
+
+    <h2>6. Clone Node</h2>
+    <div class="box" id="clone-source">
+        <p>I am the original</p>
+    </div>
+    <button onclick="cloneDemo()">Clone Me</button>
+
+    <h2>7. Virtual DOM Simulation</h2>
+    <div class="box" id="virtual-box"></div>
+    <button onclick="virtualDemo()">Simulate Virtual DOM Update</button>
+
+    <script>
+        // 1. SELECT DEMO
+        function selectDemo() {
+            const output = document.getElementById("select-output");
+            output.innerHTML = "";
+
+            // Different ways to select
+            const byId = document.getElementById("select-box");
+            const byTag = document.querySelectorAll("#select-box p");
+            const byClass = document.getElementsByClassName("text");
+            const byQuery = document.querySelector("#select-box .text");
+
+            output.innerHTML = `
+                <p><b>By ID:</b> ${byId.tagName}</p>
+                <p><b>By Tag (all p):</b> ${byTag.length} found</p>
+                <p><b>By Class:</b> ${byClass.length} found</p>
+                <p><b>By Query (first .text):</b> ${byQuery.textContent}</p>
+            `;
+        }
+
+        // 2. CREATE & APPEND
+        let itemCount = 0;
+        function createDemo() {
+            const box = document.getElementById("create-box");
+            for (let i = 0; i < 5; i++) {
+                itemCount++;
+                const item = document.createElement("p");
+                item.textContent = "Created item #" + itemCount;
+                item.style.border = "1px solid green";
+                box.appendChild(item);
+            }
+        }
+
+        // 3. MODIFY
+        function modifyDemo() {
+            const el = document.getElementById("modify-text");
+
+            // Change text
+            el.textContent = "Text has been changed!";
+
+            // Change style
+            el.style.color = "red";
+            el.style.fontSize = "24px";
+            el.style.fontWeight = "bold";
+
+            // Add class
+            el.classList.add("highlight");
+
+            // Set attribute
+            el.setAttribute("title", "This is modified text");
+        }
+
+        // 4. REMOVE
+        function removeDemo() {
+            const list = document.getElementById("remove-list");
+            if (list.lastElementChild) {
+                list.removeChild(list.lastElementChild);
+            }
+        }
+
+        // 5. EVENT HANDLING
+        const eventBox = document.getElementById("event-box");
+
+        eventBox.addEventListener("click", function() {
+            this.style.backgroundColor = "lightgreen";
+            this.textContent = "Clicked! Hover to see another event.";
+        });
+
+        eventBox.addEventListener("mouseover", function() {
+            this.style.backgroundColor = "lightyellow";
+        });
+
+        eventBox.addEventListener("mouseout", function() {
+            this.style.backgroundColor = "lightblue";
+        });
+
+        // 6. CLONE NODE
+        function cloneDemo() {
+            const source = document.getElementById("clone-source");
+            const clone = source.cloneNode(true);
+            clone.querySelector("p").textContent = "I am the CLONE!";
+            clone.style.border = "2px dashed red";
+            document.body.appendChild(clone);
+        }
+
+        // 7. VIRTUAL DOM SIMULATION
+        let virtualState = { items: [] };
+
+        function createVirtualItem(id, text) {
+            return { id, text, type: "li" };
+        }
+
+        function diff(oldState, newState) {
+            const changes = [];
+            if (JSON.stringify(oldState) !== JSON.stringify(newState)) {
+                changes.push("State changed - updating Real DOM");
+            }
+            return changes;
+        }
+
+        function renderVirtualTree(state) {
+            let html = "<ul>";
+            state.items.forEach(item => {
+                html += `<li>${item.text}</li>`;
+            });
+            html += "</ul>";
+            return html;
+        }
+
+        let nextId = 1;
+        function virtualDemo() {
+            const output = document.getElementById("virtual-box");
+            const startTime = performance.now();
+
+            // 1. Create new virtual nodes
+            let newState = { items: [...virtualState.items] };
+            for (let i = 0; i < 3; i++) {
+                newState.items.push(createVirtualItem(nextId, "Virtual item " + nextId));
+                nextId++;
+            }
+
+            // 2. Diff - compare old vs new
+            const changes = diff(virtualState, newState);
+
+            // 3. Only update Real DOM if diff found
+            if (changes.length > 0) {
+                output.innerHTML = renderVirtualTree(newState);
+                virtualState = newState;
+            }
+
+            const time = (performance.now() - startTime).toFixed(2);
+            console.log(`Virtual DOM: ${changes.join(", ")} (${time}ms)`);
+        }
+    </script>
+</body>
+</html>

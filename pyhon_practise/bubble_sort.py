@@ -1,3 +1,4 @@
+from pyhon_practise.binary_search import arr
 def bubble_sort(arr):
     n = len(arr)
 

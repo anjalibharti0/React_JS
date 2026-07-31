@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real vs Virtual DOM</title>
+</head>
+<body>
+    <h1>Real vs Virtual DOM Demo</h1>
+    <button onclick="updateRealDOM()">Update Real DOM</button>
+    <div id="real-output"></div>
+
+    <hr>
+
+    <button onclick="updateVirtualDOM()">Update Virtual DOM</button>
+    <div id="virtual-output"></div>
+
+    <script>
+        // REAL DOM: Direct manipulation (slow for many updates)
+        function updateRealDOM() {
+            const output = document.getElementById("real-output");
+            const startTime = performance.now();
+
+            for (let i = 0; i < 1000; i++) {
+                let p = document.createElement("p");
+                p.textContent = "Real DOM item " + i;
+                output.appendChild(p);
+            }
+
+            const endTime = performance.now();
+            console.log("Real DOM time: " + (endTime - startTime).toFixed(2) + "ms");
+            alert("Real DOM: " + (endTime - startTime).toFixed(2) + "ms (check console)");
+        }
+
+        // VIRTUAL DOM: Build in memory, then batch update (fast)
+        let virtualState = [];
+
+        function createVirtualNode(text) {
+            return { type: "p", text: text };
+        }
+
+        function renderVirtualNodes(nodes) {
+            let html = "";
+            nodes.forEach(node => {
+                html += "<p>" + node.text + "</p>";
+            });
+            return html;
+        }
+
+        function updateVirtualDOM() {
+            const output = document.getElementById("virtual-output");
+            const startTime = performance.now();
+
+            // 1. Build virtual nodes in memory
+            let newNodes = [];
+            for (let i = 0; i < 1000; i++) {
+                newNodes.push(createVirtualNode("Virtual DOM item " + i));
+            }
+
+            // 2. Compare (simple diff)
+            const isDifferent = JSON.stringify(newNodes) !== JSON.stringify(virtualState);
+
+            // 3. Only update Real DOM if changed
+            if (isDifferent) {
+                output.innerHTML = renderVirtualNodes(newNodes);
+                virtualState = newNodes;
+            }
+
+            const endTime = performance.now();
+            console.log("Virtual DOM time: " + (endTime - startTime).toFixed(2) + "ms");
+            alert("Virtual DOM: " + (endTime - startTime).toFixed(2) + "ms (check console)");
+        }
+    </script>
+</body>
+</html>
